@@ -1,0 +1,20 @@
+[package]
+name = "tiles-read"
+description = "Reader of 3D Tiles 1.0 and 1.1 tilesets and quantized-mesh terrain, at a level of detail that fits a view of the whole"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde_json.workspace = true
+draco-core.workspace = true
+zip.workspace = true
+tiles-core.workspace = true
+tiles-gltf.workspace = true
+tiles-model.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

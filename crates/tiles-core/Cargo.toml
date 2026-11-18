@@ -1,0 +1,13 @@
+[package]
+name = "tiles-core"
+description = "Container layer of the 3D Tiles reader: b3dm, i3dm, pnts and cmpt tiles, implicit tiling subtrees, quantized-mesh terrain, bounding volumes and WGS 84"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde_json.workspace = true
+flate2.workspace = true

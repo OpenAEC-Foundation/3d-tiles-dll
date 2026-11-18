@@ -1,0 +1,12 @@
+[package]
+name = "tiles-model"
+description = "Neutral model of the 3D Tiles reader: tile content as plain glTF with placements, points and meshes in a local east-north-up frame"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+
