@@ -118,8 +118,8 @@ pub fn unpack_document(mut doc: Value, bin: Option<Vec<u8>>, resolve: &mut Resol
                 None => resolve(uri).map_err(|e| format!("glTF buffer {uri}: {e}"))?,
             },
             None if i == 0 && bin.is_some() => bin.take().unwrap_or_default(),
-            None if fallback => Vec::new(),
-            None => return Err(format!("glTF buffer {i} has no data")),
+            // a meshopt fallback (some writers leave out the flag): zeros, decoded into below
+            None => Vec::new(),
         };
         let mut data = data;
         if data.len() < length {

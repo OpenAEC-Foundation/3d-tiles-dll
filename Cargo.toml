@@ -2,6 +2,9 @@
 resolver = "2"
 members = [
     "crates/tiles-gltf",
+    "crates/tiles-core",
+    "crates/tiles-model",
+    "crates/tiles-read",
 ]
 
 [workspace.package]
