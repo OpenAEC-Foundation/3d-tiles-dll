@@ -1,0 +1,19 @@
+[package]
+name = "tiles-gltf"
+description = "glTF made plain: Draco, meshopt, mesh quantization and KTX2 textures decoded into a self-contained glTF binary that any glTF 2.0 reader opens"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde_json.workspace = true
+draco-core.workspace = true
+meshopt-pure.workspace = true
+basisu.workspace = true
+
+[dev-dependencies]
+gltf = { version = "1.4", default-features = false, features = ["import", "utils"] }
+serde_json.workspace = true

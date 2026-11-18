@@ -1,0 +1,11 @@
+*.gltf -text
+*.json -text
+*.bin binary
+*.ktx2 binary
+*.b3dm binary
+*.i3dm binary
+*.pnts binary
+*.cmpt binary
+*.glb binary
+*.subtree binary
+*.terrain binary
