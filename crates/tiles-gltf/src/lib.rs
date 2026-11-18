@@ -159,8 +159,10 @@ pub fn unpack_document(mut doc: Value, bin: Option<Vec<u8>>, resolve: &mut Resol
         }
     }
 
-    // 4. Quantized vertex attributes as floats.
+    // 4. Quantized vertex attributes as floats; attribute names outside the core given the
+    // underscore of an application's own (older tiles write `BATCHID`).
     dequantize(&mut doc, &mut out);
+    custom_semantics(&mut doc);
 
     // 5. Textures and images: Basis KTX2 transcoded, every image embedded.
     if let Some(textures) = doc.get_mut("textures").and_then(Value::as_array_mut) {
@@ -558,6 +560,35 @@ fn dequantize(doc: &mut Value, out: &mut Packer) {
     }
 }
 
+/// Whether an attribute name is one of the core's or an application's own (`_` first).
+fn valid_semantic(name: &str) -> bool {
+    let numbered = |prefix: &str| name.strip_prefix(prefix).is_some_and(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit()));
+    name.starts_with('_') || matches!(name, "POSITION" | "NORMAL" | "TANGENT") || ["TEXCOORD_", "COLOR_", "JOINTS_", "WEIGHTS_"].iter().any(|p| numbered(p))
+}
+
+fn custom_semantics(doc: &mut Value) {
+    let Some(meshes) = doc.get_mut("meshes").and_then(Value::as_array_mut) else { return };
+    for mesh in meshes {
+        let Some(prims) = mesh.get_mut("primitives").and_then(Value::as_array_mut) else { continue };
+        for prim in prims {
+            let mut sets: Vec<&mut Value> = Vec::new();
+            if let Some(a) = prim.get_mut("attributes") {
+                sets.push(a);
+            }
+            for set in sets {
+                if let Some(map) = set.as_object_mut() {
+                    let bad: Vec<String> = map.keys().filter(|k| !valid_semantic(k)).cloned().collect();
+                    for k in bad {
+                        if let Some(v) = map.remove(&k) {
+                            map.insert(format!("_{k}"), v);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------------------------
 // KTX2 and PNG
 
@@ -680,6 +711,11 @@ mod tests {
     fn base64_and_data_uris() {
         assert_eq!(data_uri("data:application/octet-stream;base64,AAECAw==").unwrap().unwrap(), vec![0, 1, 2, 3]);
         assert!(data_uri("model.bin").is_none());
+    }
+
+    #[test]
+    fn semantics() {
+        assert!(valid_semantic("TEXCOORD_0") && valid_semantic("_BATCHID") && !valid_semantic("BATCHID") && !valid_semantic("TEXCOORD_"));
     }
 
     #[test]
