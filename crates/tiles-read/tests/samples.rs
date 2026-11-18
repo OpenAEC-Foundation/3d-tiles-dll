@@ -126,3 +126,25 @@ fn quantized_mesh_terrain() {
         assert!(reach(&t) < 60_000.0);
     }
 }
+
+/// The geometric error is scaled with the tile's transform (a tile scaled 100 times has errors
+/// 100 times as large): a tileset of one tile read twice, as is and scaled, refines alike.
+#[test]
+fn error_scales_with_the_transform() {
+    let mut tileset: serde_json::Value = serde_json::from_slice(&std::fs::read(data("BatchedColors/tileset.json")).unwrap()).unwrap();
+    tileset["root"]["children"] = serde_json::json!([{ "boundingVolume": tileset["root"]["boundingVolume"].clone(), "geometricError": 0, "content": {"uri": "missing.b3dm"} }]);
+    tileset["root"]["geometricError"] = serde_json::json!(0.0001);
+    let dir = std::env::temp_dir().join(format!("tiles-scale-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::copy(data("BatchedColors/batchedColors.b3dm"), dir.join("batchedColors.b3dm")).unwrap();
+    std::fs::write(dir.join("tileset.json"), tileset.to_string()).unwrap();
+    // an error far below a pixel: the root is not refined, the missing child is not asked for
+    let t = tiles_read::open_path(&dir.join("tileset.json"), &tiles_read::Options::default()).unwrap();
+    assert!(t.failed.is_empty(), "{:?}", t.failed);
+    tileset["root"]["transform"] = serde_json::json!([1e6, 0, 0, 0, 0, 1e6, 0, 0, 0, 0, 1e6, 0, 0, 0, 0, 1]);
+    std::fs::write(dir.join("tileset.json"), tileset.to_string()).unwrap();
+    let t = tiles_read::open_path(&dir.join("tileset.json"), &tiles_read::Options::default()).unwrap();
+    std::fs::remove_dir_all(&dir).ok();
+    // scaled a million times, the root's error is seen and the child is asked for
+    assert_eq!(t.failed.len(), 1, "{:?}", t.failed);
+}

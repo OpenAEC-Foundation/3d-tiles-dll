@@ -15,3 +15,6 @@ zip.workspace = true
 tiles-core.workspace = true
 tiles-gltf.workspace = true
 tiles-model.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

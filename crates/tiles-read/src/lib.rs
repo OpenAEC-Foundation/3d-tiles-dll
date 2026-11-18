@@ -242,7 +242,8 @@ impl Reader<'_> {
         self.out.tiles_visited += 1;
         let world = transform_of(tile, parent);
         let refine = refine_of(tile).unwrap_or(inherited);
-        let error = tile["geometricError"].as_f64().unwrap_or(0.0);
+        // the error is in the tile's own units: a scaled transform scales it too
+        let error = tile["geometricError"].as_f64().unwrap_or(0.0) * math::max_scale(&world);
         if tile["implicitTiling"].is_object() {
             return self.implicit_root(tile, base, &world, refine, error);
         }
